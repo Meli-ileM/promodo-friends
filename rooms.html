@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PomoFriends - Portail Rooms</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+    :root {
+      --bg: #0f1220;
+      --card: #1a2038;
+      --card2: #202744;
+      --border: #35406a;
+      --text: #eef1ff;
+      --muted: #aab4da;
+      --ok: #31d79b;
+      --danger: #ff8496;
+      --brandA: #5f6cff;
+      --brandB: #43acff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      background: radial-gradient(1000px 550px at 85% -5%, #26346a 0%, var(--bg) 50%);
+      padding: 22px;
+      display: grid;
+      place-items: center;
+    }
+
+    .wrap {
+      width: min(960px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(150deg, #1b2342, #151b31);
+      padding: 20px;
+    }
+
+    .title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 30px;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .input {
+      border: 1px solid var(--border);
+      background: #12172b;
+      color: var(--text);
+      border-radius: 11px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input:focus { border-color: #6e86ff; }
+
+    .btn {
+      border: none;
+      border-radius: 11px;
+      padding: 11px 12px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--brandA), var(--brandB));
+      transition: filter 0.15s ease, transform 0.15s ease;
+    }
+
+    .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+    .btn-ghost {
+      border: 1px solid var(--border);
+      background: var(--card2);
+    }
+
+    .msg {
+      font-size: 13px;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: none;
+    }
+
+    .msg.ok {
+      display: block;
+      border: 1px solid rgba(49, 215, 155, 0.45);
+      background: rgba(49, 215, 155, 0.12);
+      color: #d8fff0;
+    }
+
+    .msg.err {
+      display: block;
+      border: 1px solid rgba(255, 132, 150, 0.5);
+      background: rgba(255, 132, 150, 0.12);
+      color: #ffe0e6;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .quick {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1 class="title">PomoFriends Rooms</h1>
+      <p class="subtitle">Cette page cree des rooms et te redirige vers l'app principale. Une fois configuree, tu peux partager le lien room a tes amis.</p>
+    </section>
+
+    <section class="card">
+      <h2>Configuration Supabase</h2>
+      <div class="row">
+        <label class="label" for="supabaseUrl">Supabase URL</label>
+        <input id="supabaseUrl" class="input" placeholder="https://xxxx.supabase.co" />
+      </div>
+      <div class="row">
+        <label class="label" for="supabaseKey">Supabase anon key</label>
+        <input id="supabaseKey" class="input" placeholder="eyJhbGciOi..." />
+      </div>
+      <div class="row" style="grid-template-columns:1fr auto;display:grid;gap:8px">
+        <button id="saveConfig" class="btn btn-ghost">Enregistrer configuration</button>
+        <button id="testConfig" class="btn">Tester connexion</button>
+      </div>
+      <div id="configMsg" class="msg"></div>
+      <div class="hint">Les valeurs sont sauvegardees dans localStorage: pf_supabase_url et pf_supabase_key.</div>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <h2>Creer une room</h2>
+        <div class="row">
+          <label class="label" for="creatorName">Ton nom</label>
+          <input id="creatorName" class="input" placeholder="melissa_01" maxlength="24" />
+        </div>
+        <button id="createRoom" class="btn">Creer ma room</button>
+        <button id="copyCreatedLink" class="btn btn-ghost" disabled>Copier le lien de la room</button>
+        <div id="createMsg" class="msg"></div>
+        <div class="quick">Action: cree une room dans la table rooms puis ouvre l'app sur la room creee.</div>
+      </section>
+
+      <section class="card">
+        <h2>Rejoindre une room</h2>
+        <div class="row">
+          <label class="label" for="joinName">Ton nom</label>
+          <input id="joinName" class="input" placeholder="thomas_02" maxlength="24" />
+        </div>
+        <div class="row">
+          <label class="label" for="joinRoomId">Room ID</label>
+          <input id="joinRoomId" class="input" placeholder="room-ab12cd" maxlength="64" />
+        </div>
+        <button id="joinRoom" class="btn">Rejoindre</button>
+        <div id="joinMsg" class="msg"></div>
+        <div class="quick">Action: verifie que la room existe puis redirige vers l'app avec ?room=...</div>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const E = {
+      url: document.getElementById('supabaseUrl'),
+      key: document.getElementById('supabaseKey'),
+      saveConfig: document.getElementById('saveConfig'),
+      testConfig: document.getElementById('testConfig'),
+      configMsg: document.getElementById('configMsg'),
+      creatorName: document.getElementById('creatorName'),
+      createRoom: document.getElementById('createRoom'),
+      copyCreatedLink: document.getElementById('copyCreatedLink'),
+      createMsg: document.getElementById('createMsg'),
+      joinName: document.getElementById('joinName'),
+      joinRoomId: document.getElementById('joinRoomId'),
+      joinRoom: document.getElementById('joinRoom'),
+      joinMsg: document.getElementById('joinMsg')
+    };
+
+    let createdLink = '';
+
+    function setMsg(el, type, text) {
+      el.className = 'msg ' + type;
+      el.textContent = text;
+    }
+
+    function slugify(v) {
+      return String(v || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    }
+
+    function getClient() {
+      const url = E.url.value.trim();
+      const key = E.key.value.trim();
+      if (!url || !key) throw new Error('Renseigne Supabase URL et anon key.');
+      return window.supabase.createClient(url, key);
+    }
+
+    function saveConfig() {
+      localStorage.setItem('pf_supabase_url', E.url.value.trim());
+      localStorage.setItem('pf_supabase_key', E.key.value.trim());
+    }
+
+    async function testConnection() {
+      try {
+        const sb = getClient();
+        saveConfig();
+        const { error } = await sb.from('rooms').select('id').limit(1);
+        if (error) {
+          throw new Error('Connexion ok mais table rooms absente. Execute supabase_schema.sql.');
+        }
+        setMsg(E.configMsg, 'ok', 'Connexion valide. Table rooms detectee.');
+      } catch (e) {
+        setMsg(E.configMsg, 'err', e.message || 'Echec de connexion.');
+      }
+    }
+
+    async function createRoomFlow() {
+      try {
+        const name = E.creatorName.value.trim();
+        if (!name) throw new Error('Ecris ton nom pour creer une room.');
+        const sb = getClient();
+        saveConfig();
+
+        const roomId = 'room-' + Math.random().toString(36).slice(2, 8);
+        const payload = { id: roomId, nom: roomId, created_by: name };
+        const { error } = await sb.from('rooms').insert(payload);
+        if (error) throw new Error(error.message);
+
+        createdLink = location.origin + location.pathname.replace('rooms.html', 'pomofriends_social_pomodoro.html') + '?room=' + encodeURIComponent(roomId);
+        E.copyCreatedLink.disabled = false;
+        setMsg(E.createMsg, 'ok', 'Room creee: ' + roomId + '. Redirection en cours...');
+
+        localStorage.setItem('pf_last_name', name);
+        setTimeout(() => {
+          location.href = createdLink;
+        }, 500);
+      } catch (e) {
+        setMsg(E.createMsg, 'err', e.message || 'Creation impossible.');
+      }
+    }
+
+    async function joinRoomFlow() {
+      try {
+        const name = E.joinName.value.trim();
+        let roomId = E.joinRoomId.value.trim();
+        if (!name) throw new Error('Ecris ton nom pour rejoindre.');
+        if (!roomId) throw new Error('Entre un room ID.');
+
+        roomId = slugify(roomId);
+
+        const sb = getClient();
+        saveConfig();
+
+        const { data, error } = await sb.from('rooms').select('id').eq('id', roomId).single();
+        if (error || !data) throw new Error('Room introuvable.');
+
+        localStorage.setItem('pf_last_name', name);
+        const target = location.origin + location.pathname.replace('rooms.html', 'pomofriends_social_pomodoro.html') + '?room=' + encodeURIComponent(roomId);
+        setMsg(E.joinMsg, 'ok', 'Room trouvee. Redirection en cours...');
+        setTimeout(() => {
+          location.href = target;
+        }, 400);
+      } catch (e) {
+        setMsg(E.joinMsg, 'err', e.message || 'Join impossible.');
+      }
+    }
+
+    async function copyCreatedLink() {
+      if (!createdLink) return;
+      try {
+        await navigator.clipboard.writeText(createdLink);
+        setMsg(E.createMsg, 'ok', 'Lien copie: ' + createdLink);
+      } catch (_e) {
+        setMsg(E.createMsg, 'err', 'Impossible de copier automatiquement le lien.');
+      }
+    }
+
+    function prefill() {
+      E.url.value = localStorage.getItem('pf_supabase_url') || '';
+      E.key.value = localStorage.getItem('pf_supabase_key') || '';
+      const last = localStorage.getItem('pf_last_name') || '';
+      E.creatorName.value = last;
+      E.joinName.value = last;
+
+      const roomInUrl = new URLSearchParams(location.search).get('room');
+      if (roomInUrl) E.joinRoomId.value = roomInUrl;
+    }
+
+    E.saveConfig.addEventListener('click', () => {
+      saveConfig();
+      setMsg(E.configMsg, 'ok', 'Configuration sauvegardee.');
+    });
+    E.testConfig.addEventListener('click', testConnection);
+    E.createRoom.addEventListener('click', createRoomFlow);
+    E.joinRoom.addEventListener('click', joinRoomFlow);
+    E.copyCreatedLink.addEventListener('click', copyCreatedLink);
+
+    prefill();
+  </script>
+</body>
+</html>

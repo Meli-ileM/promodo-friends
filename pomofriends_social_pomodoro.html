@@ -1,0 +1,465 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0d0f14;--bg2:#13161e;--bg3:#1a1e2a;--bg4:#222736;
+    --card:#1e2230;--card2:#252a3a;
+    --purple:#8b7cf8;--purple2:#a594fa;--purple3:#6b5ce7;
+    --green:#4ade80;--green2:#22c55e;
+    --amber:#fbbf24;--blue:#60a5fa;--pink:#f472b6;--red:#f87171;
+    --text:#e8eaf6;--text2:#9ba3c4;--text3:#5a6280;
+    --border:#2a3050;--border2:#3a4060;
+    --focus-start:#667eea;--focus-end:#764ba2;
+    --break-start:#11998e;--break-end:#38ef7d;
+    --r:12px;--r2:20px;
+    --shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:600px;overflow:hidden}
+  .app{display:grid;grid-template-columns:1fr 320px;height:600px;gap:0}
+  
+  /* === LEFT PANEL === */
+  .left{display:flex;flex-direction:column;padding:24px;gap:16px;overflow:hidden}
+  .header{display:flex;align-items:center;justify-content:space-between}
+  .logo{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--purple2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .room-badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;cursor:pointer;transition:.2s}
+  .room-badge:hover{border-color:var(--purple)}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+  
+  /* === TIMER SECTION === */
+  .timer-section{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .phase-tabs{display:flex;gap:8px}
+  .phase-tab{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;border:1px solid var(--border)}
+  .phase-tab.active{background:var(--purple3);border-color:var(--purple);color:white}
+  .phase-tab:not(.active){color:var(--text2);background:var(--bg3)}
+  .phase-tab:not(.active):hover{border-color:var(--border2);color:var(--text)}
+  
+  .timer-ring-wrap{position:relative;width:180px;height:180px;flex-shrink:0}
+  .timer-ring-wrap svg{transform:rotate(-90deg)}
+  .ring-bg{fill:none;stroke:var(--bg3);stroke-width:8}
+  .ring-progress{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .5s ease,stroke .5s ease}
+  .timer-display{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+  .timer-time{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1}
+  .timer-label{font-size:11px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+  
+  .timer-controls{display:flex;align-items:center;gap:12px}
+  .btn-ctrl{width:44px;height:44px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:16px}
+  .btn-ctrl:hover{background:var(--bg4);color:var(--text)}
+  .btn-main{width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:.15s;box-shadow:0 0 20px rgba(139,124,248,.3)}
+  .btn-main:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(139,124,248,.5)}
+  .btn-main:active{transform:scale(.97)}
+  
+  /* === STATS ROW === */
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center}
+  .stat-val{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--purple2)}
+  .stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+  
+  /* === PLANT === */
+  .plant-area{display:flex;align-items:center;justify-content:center;gap:12px}
+  .plant-svg{transition:.5s}
+  
+  /* === TODO === */
+  .todo-section{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+  .section-title{font-size:13px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.8px}
+  .todo-add{display:flex;gap:8px}
+  .todo-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:.2s}
+  .todo-input:focus{border-color:var(--purple)}
+  .todo-input::placeholder{color:var(--text3)}
+  .btn-add{background:var(--purple3);border:none;color:white;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:18px;transition:.15s}
+  .btn-add:hover{background:var(--purple)}
+  .todo-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+  .todo-list::-webkit-scrollbar{width:3px}
+  .todo-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  .todo-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:grab;transition:.2s;animation:slideIn .25s ease}
+  .todo-item:hover{border-color:var(--border2);background:var(--card2)}
+  .todo-item.done .todo-text{text-decoration:line-through;color:var(--text3)}
+  .todo-item.drag-over{border-color:var(--purple);background:var(--bg4)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+  .todo-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:11px}
+  .todo-check.checked{background:var(--green2);border-color:var(--green2);color:white}
+  .todo-text{flex:1;font-size:14px}
+  .todo-del{color:var(--text3);cursor:pointer;font-size:14px;opacity:0;transition:.2s}
+  .todo-item:hover .todo-del{opacity:1}
+  .todo-del:hover{color:var(--red)}
+  
+  /* === RIGHT PANEL (SOCIAL) === */
+  .right{background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+  .social-header{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .social-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600}
+  .online-count{background:var(--bg3);border-radius:12px;padding:4px 10px;font-size:12px;color:var(--green);font-weight:500}
+  
+  .friends-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .friends-list::-webkit-scrollbar{width:3px}
+  .friends-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  
+  .friend-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;transition:.2s;animation:fadeUp .3s ease}
+  .friend-card:hover{border-color:var(--border2)}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .friend-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0;position:relative}
+  .avatar-status{position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid var(--card)}
+  .friend-info{flex:1;min-width:0}
+  .friend-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .friend-task{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .friend-mini-timer{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+  .mini-bar-wrap{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+  .mini-bar{height:100%;border-radius:2px;transition:width .5s ease}
+  .mini-time{font-size:11px;color:var(--text3);flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+  .cheer-btns{display:flex;gap:6px}
+  .cheer-btn{flex:1;padding:5px 0;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px;transition:.2s;text-align:center}
+  .cheer-btn:hover{background:var(--bg4);border-color:var(--border2);transform:scale(1.05)}
+  .cheer-btn:active{transform:scale(.97)}
+  
+  /* === FEED === */
+  .feed-area{border-top:1px solid var(--border);padding:12px;max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+  .feed-area::-webkit-scrollbar{width:3px}
+  .feed-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  .feed-msg{font-size:12px;color:var(--text2);display:flex;align-items:flex-start;gap:6px;animation:slideIn .25s ease}
+  .feed-msg span:first-child{font-weight:500;color:var(--text);flex-shrink:0}
+  .feed-time{color:var(--text3);font-size:11px;flex-shrink:0;margin-left:auto}
+  
+  /* === INPUT AREA === */
+  .input-area{padding:12px;border-top:1px solid var(--border)}
+  .pseudo-form{display:flex;flex-direction:column;gap:8px}
+  .input-row{display:flex;gap:8px}
+  .pseudo-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:.2s}
+  .pseudo-input:focus{border-color:var(--purple)}
+  .pseudo-input::placeholder{color:var(--text3)}
+  .btn-join{background:linear-gradient(135deg,var(--purple3),var(--purple));border:none;color:white;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:13px;font-weight:500;transition:.15s;white-space:nowrap}
+  .btn-join:hover{opacity:.9;transform:scale(1.02)}
+  
+  /* === FLOATING EMOJIS === */
+  .emoji-float{position:fixed;pointer-events:none;font-size:28px;z-index:1000;animation:floatUp 2s ease forwards}
+  @keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1;transform:translateY(-60px) scale(1.2)}100%{opacity:0;transform:translateY(-120px) scale(.8)}}
+  
+  /* === TOAST === */
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:10px 20px;font-size:13px;z-index:999;animation:toastIn .3s ease;white-space:nowrap;box-shadow:var(--shadow)}
+  .toast.out{animation:toastOut .3s ease forwards}
+  @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  @keyframes toastOut{to{opacity:0;transform:translateX(-50%) translateY(10px)}}
+  
+  /* === SCROLLBAR === */
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+</style>
+
+<div class="app" id="app">
+  <!-- LEFT -->
+  <div class="left">
+    <div class="header">
+      <div class="logo">🍅 PomoFriends</div>
+      <div class="room-badge" id="roomBadge"><span class="dot-live"></span><span id="roomName">Room: focus-xyz</span></div>
+    </div>
+    
+    <div class="timer-section">
+      <div class="phase-tabs">
+        <div class="phase-tab active" id="tab-work" onclick="setPhase('work')">Focus 25min</div>
+        <div class="phase-tab" id="tab-break" onclick="setPhase('break')">Pause 5min</div>
+      </div>
+      
+      <div class="timer-ring-wrap">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle class="ring-bg" cx="90" cy="90" r="80"/>
+          <circle class="ring-progress" id="ringProg" cx="90" cy="90" r="80"
+            stroke-dasharray="502.65" stroke-dashoffset="0"
+            style="stroke:url(#gWork)"/>
+          <defs>
+            <linearGradient id="gWork" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#667eea"/>
+              <stop offset="100%" stop-color="#f472b6"/>
+            </linearGradient>
+            <linearGradient id="gBreak" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#11998e"/>
+              <stop offset="100%" stop-color="#38ef7d"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timerTime">25:00</div>
+          <div class="timer-label" id="timerLabel">Focus</div>
+        </div>
+      </div>
+      
+      <div class="timer-controls">
+        <button class="btn-ctrl" onclick="resetTimer()" title="Reset">↺</button>
+        <button class="btn-main" id="btnPlay" onclick="toggleTimer()">▶</button>
+        <button class="btn-ctrl" onclick="skipPhase()" title="Passer">⏭</button>
+      </div>
+    </div>
+    
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-val" id="statPomos">0</div><div class="stat-lbl">Pomodoros</div></div>
+      <div class="stat-card"><div class="stat-val" id="statMins">0</div><div class="stat-lbl">Min focus</div></div>
+      <div class="stat-card">
+        <div id="plantSvg">🌱</div>
+        <div class="stat-lbl">Ta plante</div>
+      </div>
+    </div>
+    
+    <div class="todo-section">
+      <div class="section-title">Tâches</div>
+      <div class="todo-add">
+        <input class="todo-input" id="todoInput" placeholder="Ajouter une tâche..." onkeydown="if(event.key==='Enter')addTodo()">
+        <button class="btn-add" onclick="addTodo()">+</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+    </div>
+  </div>
+  
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="social-header">
+      <div class="social-title">Amis en ligne</div>
+      <div class="online-count" id="onlineCount">4 en ligne</div>
+    </div>
+    
+    <div class="friends-list" id="friendsList"></div>
+    
+    <div class="feed-area" id="feedArea"></div>
+    
+    <div class="input-area">
+      <div class="pseudo-form">
+        <div class="input-row">
+          <input class="pseudo-input" id="pseudoInput" placeholder="Ton pseudo..." maxlength="16">
+          <button class="btn-join" onclick="joinRoom()">Rejoindre ✨</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);text-align:center">Partage le lien de room à tes amis !</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- STATE ----
+let phase = 'work';
+let totalSec = 25*60;
+let remaining = totalSec;
+let running = false;
+let interval = null;
+let pomos = 0;
+let focusMins = 0;
+let dragSrc = null;
+let myName = '';
+let todos = [
+  {id:1, text:'Finir le rapport IoT', done:false},
+  {id:2, text:'Réviser pour l\'exam', done:false},
+  {id:3, text:'Envoyer les slides', done:true},
+];
+
+// ---- FAKE FRIENDS ----
+const AVATARS = [
+  {name:'Melissa',task:'Projet IoT',color:'#8b7cf8',bg:'#2a2050',phase:'work',elapsed:720,total:1500,status:'focus'},
+  {name:'Thomas',task:'Pause café ☕',color:'#4ade80',bg:'#1a3020',phase:'break',elapsed:120,total:300,status:'break'},
+  {name:'Amira',task:'Algo & Maths',color:'#f472b6',bg:'#3a1530',phase:'work',elapsed:300,total:1500,status:'focus'},
+  {name:'Lucas',task:'Design UI',color:'#60a5fa',bg:'#152040',phase:'work',elapsed:900,total:1500,status:'focus'},
+];
+
+const CHEERS = ['☕','🔥','💪','👏'];
+const FEED_MSGS = [];
+let feedId = 0;
+
+function getInitials(n){return n.slice(0,2).toUpperCase()}
+
+function renderFriends(){
+  const el = document.getElementById('friendsList');
+  el.innerHTML = AVATARS.map((f,i) => {
+    const pct = Math.round((f.elapsed/f.total)*100);
+    const remSec = f.total - f.elapsed;
+    const mm = String(Math.floor(remSec/60)).padStart(2,'0');
+    const ss = String(remSec%60).padStart(2,'0');
+    const barColor = f.phase==='work'?'linear-gradient(90deg,#667eea,#f472b6)':'linear-gradient(90deg,#11998e,#38ef7d)';
+    const statusColor = f.phase==='work'?'#8b7cf8':'#4ade80';
+    return `<div class="friend-card" id="fc${i}">
+      <div class="friend-top">
+        <div class="avatar" style="background:${f.bg};color:${f.color}">
+          ${getInitials(f.name)}
+          <div class="avatar-status" style="background:${statusColor}"></div>
+        </div>
+        <div class="friend-info">
+          <div class="friend-name">${f.name}</div>
+          <div class="friend-task">${f.task}</div>
+        </div>
+      </div>
+      <div class="friend-mini-timer">
+        <div class="mini-bar-wrap"><div class="mini-bar" style="width:${pct}%;background:${barColor}"></div></div>
+        <div class="mini-time">${mm}:${ss}</div>
+      </div>
+      <div class="cheer-btns">
+        ${CHEERS.map(c=>`<div class="cheer-btn" onclick="sendCheer('${f.name}','${c}',event)">${c}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function sendCheer(name, emoji, e){
+  const x = e.clientX;
+  const y = e.clientY;
+  for(let k=0;k<3;k++){
+    setTimeout(()=>{
+      const el = document.createElement('div');
+      el.className='emoji-float';
+      el.textContent=emoji;
+      el.style.left=(x+Math.random()*40-20)+'px';
+      el.style.top=(y)+'px';
+      el.style.animationDelay=(k*0.15)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),2000);
+    },k*100);
+  }
+  addFeed(`Tu as envoyé ${emoji} à ${name} !`);
+  showToast(`${emoji} envoyé à ${name} !`);
+}
+
+function addFeed(msg){
+  const now = new Date();
+  const t = now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  FEED_MSGS.unshift({msg,t});
+  if(FEED_MSGS.length>20)FEED_MSGS.pop();
+  const el=document.getElementById('feedArea');
+  const div=document.createElement('div');
+  div.className='feed-msg';
+  div.innerHTML=`<span>Toi</span> ${msg} <span class="feed-time">${t}</span>`;
+  el.insertBefore(div,el.firstChild);
+}
+
+function showToast(msg){
+  const old=document.querySelector('.toast');
+  if(old)old.remove();
+  const t=document.createElement('div');
+  t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),300)},2200);
+}
+
+// ---- TIMER ----
+function pad(n){return String(n).padStart(2,'0')}
+function setPhase(p){
+  phase=p;
+  document.getElementById('tab-work').classList.toggle('active',p==='work');
+  document.getElementById('tab-break').classList.toggle('active',p==='break');
+  totalSec=p==='work'?25*60:5*60;
+  remaining=totalSec;
+  running=false;clearInterval(interval);
+  document.getElementById('btnPlay').textContent='▶';
+  document.getElementById('timerLabel').textContent=p==='work'?'Focus':'Pause';
+  document.getElementById('ringProg').style.stroke=p==='work'?'url(#gWork)':'url(#gBreak)';
+  updateDisplay();
+}
+function updateDisplay(){
+  const m=Math.floor(remaining/60),s=remaining%60;
+  document.getElementById('timerTime').textContent=pad(m)+':'+pad(s);
+  const pct=1-(remaining/totalSec);
+  const circ=2*Math.PI*80;
+  document.getElementById('ringProg').style.strokeDashoffset=(circ*(1-pct)).toFixed(2);
+}
+function toggleTimer(){
+  if(running){running=false;clearInterval(interval);document.getElementById('btnPlay').textContent='▶';}
+  else{
+    running=true;
+    document.getElementById('btnPlay').textContent='⏸';
+    interval=setInterval(tick,1000);
+  }
+}
+function tick(){
+  if(remaining<=0){onPhaseEnd();return;}
+  remaining--;
+  if(phase==='work'&&running)focusMins=Math.round((totalSec-remaining)/60);
+  document.getElementById('statMins').textContent=focusMins;
+  updateDisplay();
+}
+function onPhaseEnd(){
+  clearInterval(interval);running=false;
+  document.getElementById('btnPlay').textContent='▶';
+  if(phase==='work'){
+    pomos++;
+    document.getElementById('statPomos').textContent=pomos;
+    updatePlant();
+    showToast('🎉 Pomodoro terminé ! +1 graine');
+    addFeed('a terminé un pomodoro ! 🍅');
+    setTimeout(()=>setPhase('break'),500);
+  } else {
+    showToast('☕ Pause terminée ! Prêt pour la suite ?');
+    setTimeout(()=>setPhase('work'),500);
+  }
+}
+function resetTimer(){running=false;clearInterval(interval);remaining=totalSec;document.getElementById('btnPlay').textContent='▶';updateDisplay();}
+function skipPhase(){if(phase==='work')setPhase('break');else setPhase('work');}
+
+const PLANTS=['🌱','🌿','🪴','🌳','🌲','🌳✨'];
+function updatePlant(){
+  const idx=Math.min(pomos,PLANTS.length-1);
+  document.getElementById('plantSvg').textContent=PLANTS[idx];
+}
+
+// ---- TODOS ----
+function renderTodos(){
+  const el=document.getElementById('todoList');
+  el.innerHTML=todos.filter(t=>!t.done).concat(todos.filter(t=>t.done)).map(t=>`
+    <div class="todo-item ${t.done?'done':''}" draggable="true" data-id="${t.id}"
+      ondragstart="dragStart(event,${t.id})" ondragover="dragOver(event)" ondrop="drop(event,${t.id})" ondragleave="dragLeave(event)">
+      <div class="todo-check ${t.done?'checked':''}" onclick="toggleTodo(${t.id})">${t.done?'✓':''}</div>
+      <div class="todo-text">${t.text}</div>
+      <div class="todo-del" onclick="deleteTodo(${t.id})">✕</div>
+    </div>`).join('');
+}
+function addTodo(){
+  const inp=document.getElementById('todoInput');
+  const v=inp.value.trim();
+  if(!v)return;
+  todos.push({id:Date.now(),text:v,done:false});
+  inp.value='';renderTodos();
+}
+function toggleTodo(id){const t=todos.find(x=>x.id===id);if(t)t.done=!t.done;renderTodos();}
+function deleteTodo(id){todos=todos.filter(x=>x.id!==id);renderTodos();}
+
+function dragStart(e,id){dragSrc=id;e.dataTransfer.effectAllowed='move';}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');return false;}
+function dragLeave(e){e.currentTarget.classList.remove('drag-over');}
+function drop(e,id){
+  e.preventDefault();e.stopPropagation();
+  e.currentTarget.classList.remove('drag-over');
+  if(dragSrc===id)return;
+  const fi=todos.findIndex(x=>x.id===dragSrc);
+  const ti=todos.findIndex(x=>x.id===id);
+  const [moved]=todos.splice(fi,1);
+  todos.splice(ti,0,moved);
+  renderTodos();
+}
+
+// ---- JOIN ----
+function joinRoom(){
+  const n=document.getElementById('pseudoInput').value.trim();
+  if(!n)return showToast('Entre ton pseudo !');
+  myName=n;
+  showToast(`Bienvenue ${n} ! 🎉`);
+  addFeed(`a rejoint la room !`);
+  document.getElementById('roomName').textContent='Room: focus-xyz';
+}
+
+// ---- FRIEND SIMULATION ----
+function simFriends(){
+  AVATARS.forEach((f,i)=>{
+    if(f.phase==='work'){
+      f.elapsed=Math.min(f.elapsed+5,f.total);
+      if(f.elapsed>=f.total){
+        f.elapsed=0;f.phase='break';f.total=300;
+        addFeed(`${f.name} a terminé un pomodoro ! 🍅`);
+      }
+    } else {
+      f.elapsed=Math.min(f.elapsed+5,f.total);
+      if(f.elapsed>=f.total){f.elapsed=0;f.phase='work';f.total=1500;}
+    }
+  });
+  renderFriends();
+}
+
+// ---- INIT ----
+updateDisplay();renderTodos();renderFriends();
+setInterval(simFriends, 5000);
+// Occasional cheer from friends
+setInterval(()=>{
+  const msgs=['Melissa est en plein focus ! 💪','Thomas reprend son travail 🔥','Amira a envoyé ☕ à Lucas'];
+  addFeed(msgs[Math.floor(Math.random()*msgs.length)]);
+},15000);
+</script>
