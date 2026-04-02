@@ -38,9 +38,23 @@ export default function PomodoroPage() {
   const [incomingCheer, setIncomingCheer] = useState("");
   const intervalRef = useRef(null);
   const lastCheerIdRef = useRef("");
+  const syncStateRef = useRef({});
 
   const currentTask = useMemo(() => tasks.find((t) => !t.done)?.text || "", [tasks]);
   const shareLink = `${window.location.origin}/?room=${roomId}`;
+
+  useEffect(() => {
+    syncStateRef.current = {
+      roomId,
+      meId,
+      name,
+      phase,
+      running,
+      timeLeft,
+      points,
+      currentTask
+    };
+  }, [roomId, meId, name, phase, running, timeLeft, points, currentTask]);
 
   useEffect(() => {
     if (!name) navigate(`/?room=${encodeURIComponent(roomId)}`);
@@ -116,17 +130,18 @@ export default function PomodoroPage() {
       syncMember();
     }, 5000);
     return () => clearInterval(timer);
-  }, [phase, timeLeft, points, currentTask, running]);
+  }, []);
 
   async function syncMember() {
-    if (!name) return;
-    await upsertMember(roomId, meId, {
-      name,
-      phase,
-      running,
-      timeLeft,
-      points,
-      currentTask
+    const s = syncStateRef.current;
+    if (!s.name) return;
+    await upsertMember(s.roomId, s.meId, {
+      name: s.name,
+      phase: s.phase,
+      running: s.running,
+      timeLeft: s.timeLeft,
+      points: s.points,
+      currentTask: s.currentTask
     });
   }
 
