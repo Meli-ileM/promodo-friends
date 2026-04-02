@@ -1,5 +1,5 @@
 # PomoFriends Fullstack (React + Node + Firebase)
-
+npx plugins add vercel/vercel-plugin
 A special web site for my friends to study together heh.
 
 Projet complet from scratch:
