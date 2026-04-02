@@ -21,10 +21,19 @@ function memberId() {
   return id;
 }
 
+function sessionId() {
+  const existing = sessionStorage.getItem("pf_session_id");
+  if (existing) return existing;
+  const id = crypto.randomUUID();
+  sessionStorage.setItem("pf_session_id", id);
+  return id;
+}
+
 export default function PomodoroPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const meId = useMemo(() => memberId(), []);
+  const mySessionId = useMemo(() => sessionId(), []);
   const name = localStorage.getItem("pf_name") || "";
 
   const [phase, setPhase] = useState("work");
@@ -40,13 +49,17 @@ export default function PomodoroPage() {
   const lastCheerIdRef = useRef("");
   const syncStateRef = useRef({});
 
-  const currentTask = useMemo(() => tasks.find((t) => !t.done)?.text || "", [tasks]);
+  const currentTask = useMemo(
+    () => tasks.find((t) => !t.done)?.text || (running ? "Session focus" : ""),
+    [tasks, running]
+  );
   const shareLink = `${window.location.origin}/?room=${roomId}`;
 
   useEffect(() => {
     syncStateRef.current = {
       roomId,
       meId,
+      mySessionId,
       name,
       phase,
       running,
@@ -54,7 +67,7 @@ export default function PomodoroPage() {
       points,
       currentTask
     };
-  }, [roomId, meId, name, phase, running, timeLeft, points, currentTask]);
+  }, [roomId, meId, mySessionId, name, phase, running, timeLeft, points, currentTask]);
 
   useEffect(() => {
     if (!name) navigate(`/?room=${encodeURIComponent(roomId)}`);
@@ -90,6 +103,21 @@ export default function PomodoroPage() {
       if (unsubscribeCheers) unsubscribeCheers();
     };
   }, [roomId]);
+
+  useEffect(() => {
+    const handleSessionEnd = () => {
+      syncMember({ online: false, running: false }).catch(() => {});
+    };
+
+    window.addEventListener("beforeunload", handleSessionEnd);
+    window.addEventListener("pagehide", handleSessionEnd);
+
+    return () => {
+      handleSessionEnd();
+      window.removeEventListener("beforeunload", handleSessionEnd);
+      window.removeEventListener("pagehide", handleSessionEnd);
+    };
+  }, []);
 
   useEffect(() => {
     if (!cheers.length) return;
@@ -132,16 +160,19 @@ export default function PomodoroPage() {
     return () => clearInterval(timer);
   }, []);
 
-  async function syncMember() {
+  async function syncMember(overrides = {}) {
     const s = syncStateRef.current;
     if (!s.name) return;
     await upsertMember(s.roomId, s.meId, {
       name: s.name,
+      sessionId: s.mySessionId,
+      online: true,
       phase: s.phase,
       running: s.running,
       timeLeft: s.timeLeft,
       points: s.points,
-      currentTask: s.currentTask
+      currentTask: s.currentTask,
+      ...overrides
     });
   }
 

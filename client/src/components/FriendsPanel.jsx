@@ -1,6 +1,6 @@
 export default function FriendsPanel({ members, meId, onSendCheer }) {
   const active = members
-    .filter((m) => Date.now() - Number(m.updatedAtMs || 0) < 45000)
+    .filter((m) => m.online !== false)
     .slice()
     .sort((a, b) => {
       const an = (a.name || "").toLowerCase();
